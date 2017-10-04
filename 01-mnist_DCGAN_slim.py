@@ -85,7 +85,7 @@ def generator(z, batch_size=batch_size, phase_train=True, reuse=False, use_bias=
 
         net = slim.conv2d_transpose(net, 1, (4,4), stride=1, padding='SAME', weights_initializer=weight_init, trainable=phase_train, activation_fn=None)
         # net = slim.batch_norm(net, epsilon=1e-5, trainable=phase_train, fused=True)
-        net = tf.nn.relu(net)
+        net = tf.nn.tanh(net)
         print ("G3: ", net)
 
         net = tf.reshape(net, [batch_size, img_len, img_len, img_channel])
@@ -139,8 +139,8 @@ def trainGAN(checkpoint=None, model_name=model_name):
     print ('[!] train shape: ', train.shape)
     print ('[!] train (min, max): ', train.min(), train.max())
     # --- CENTRAL ---
-    # train /= (train.max() - train.min())
-    # train = train * 2. - 1.
+    train /= (train.max() - train.min())
+    train = train * 2. - 1.
     # ---------------
 
     global_step = tf.train.get_or_create_global_step()
