@@ -268,7 +268,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
             # _,  gen_loss, _ = sess.run([optimizer_op_g,g_loss,d_loss],feed_dict={z_vector:z, x_vector:x})
             _, summary_g, gen_loss = sess.run([optimizer_op_g,summary_g_loss,g_loss],feed_dict={z_vector:z, x_vector:x})
             d_accuracy, n_x, n_z = sess.run([d_acc, n_p_x, n_p_z],feed_dict={z_vector:z, x_vector:x})
-            print (' [epoch {:>5d}] D_loss: {:<15.8e}  G_loss: {:<15.8e} | D(x)->1: {:<10d} D(G(z))->0: {:<10d} | D_acc: {:<10} | [ETA] {}'.format(
+            print (' [epoch {:>5d}] D_loss: {:<15.8e}  G_loss: {:<15.8e} | D(x)->1: {:<10d} D(G(z))->0: {:<10d} | D_acc: {:<10f} | [ETA] {}'.format(
                     epoch, disc_loss, gen_loss, n_x, n_z, d_accuracy, time.time() - T_start))
 
             if FLAGS.Dp and d_accuracy < d_thresh:
@@ -285,7 +285,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
                     epoch, disc_loss, gen_loss, n_x, n_z, d_accuracy))
 
             # output generated images
-            if epoch % 1000 == 0:
+            if epoch % 200 == 0:
                 g_train = sess.run(g_z,feed_dict={z_vector:z}) #type=np.ndarray
                 g_val   = sess.run(g_z,feed_dict={z_vector:z_val}) #type=np.ndarray
                 if not os.path.exists(train_sample_directory):
@@ -298,7 +298,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
                 # ---------------------------------------------------------------------------------------------------------------------
 
             # save checkpoint
-            if epoch % 1000 == 0:
+            if epoch % 200 == 0:
                 if not os.path.exists(model_directory):
                     os.makedirs(model_directory)
                 saver.save(sess, save_path = os.path.join(model_directory, '{}.ckpt'.format(model_name)), global_step=global_step)

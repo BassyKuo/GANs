@@ -15,7 +15,7 @@ You have to check the packages first, and use `pip install` to install if you mi
 
 ## Run
 ```python
-python 01-imagenet_DCGAN_slim.py --bs 256 --dlr 0.0002 --glr 0.0002
+python 01-cifar10_DCGAN_slim.py --bs 256 --dlr 0.0002 --glr 0.0002
 ```
 
 ## Results & Models

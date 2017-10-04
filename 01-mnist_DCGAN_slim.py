@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 '''
 DCGAN
+** no inception_score because the channel 1 != 3
 '''
 import os
 import sys
@@ -56,7 +57,7 @@ d_thresh   = FLAGS.d_thresh
 leak_value = FLAGS.leak
 
 img_len    = 28
-img_channel= 3
+img_channel= 1
 
 f_dim = [1024, 512, 256, 128, img_channel]
 
@@ -146,8 +147,8 @@ def trainGAN(checkpoint=None, model_name=model_name):
     slim.add_model_variable(global_step)
     with tf.variable_scope('global_step_update', reuse=True):
         global_step_update = tf.assign_add(global_step, 1)
-    with tf.variable_scope('inception'):
-        inp_score = tf.placeholder(tf.float32, name='score')
+    # with tf.variable_scope('inception'):
+    #     inp_score = tf.placeholder(tf.float32, name='score')
         # inp_score = tf.get_variable('score', shape=[], initializer=tf.zeros_initializer())
         # inp_std = tf.get_variable('std', shape=[], initializer=tf.zeros_initializer())
     config = tf.ConfigProto()
@@ -244,7 +245,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
         summary_n_p_z    = tf.summary.scalar("n_p_z", n_p_z)
         summary_n_p_x    = tf.summary.scalar("n_p_x", n_p_x)
         summary_d_acc    = tf.summary.scalar("d_acc", d_acc)
-        summary_inp_score = tf.summary.scalar("inp_score", inp_score)
+        # summary_inp_score = tf.summary.scalar("inp_score", inp_score)
         d_summary_merge = tf.summary.merge([summary_d_loss,
                                             summary_d_x_hist,
                                             summary_d_z_hist,
@@ -262,7 +263,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
         z_val = np.random.normal(0, 1, size=[batch_size, z_size]).astype(np.float32)
         # z_val = np.random.uniform(-1, 1, size=[batch_size, z_size]).astype(np.float32)
 
-        from utils.benchmark import get_inception_score
+        # from utils.benchmark import get_inception_score
 
         for epoch in range(sess.run(global_step), n_epochs):
             idx = np.random.randint(len(train), size=batch_size)
@@ -278,7 +279,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
             # _,  gen_loss, _ = sess.run([optimizer_op_g,g_loss,d_loss],feed_dict={z_vector:z, x_vector:x})
             _, summary_g, gen_loss = sess.run([optimizer_op_g,summary_g_loss,g_loss],feed_dict={z_vector:z, x_vector:x})
             d_accuracy, n_x, n_z = sess.run([d_acc, n_p_x, n_p_z],feed_dict={z_vector:z, x_vector:x})
-            print (' [epoch {:>5d}] D_loss: {:<15.8e}  G_loss: {:<15.8e} | D(x)->1: {:<10d} D(G(z))->0: {:<10d} | D_acc: {:<10} | [ETA] {}'.format(
+            print (' [epoch {:>5d}] D_loss: {:<15.8e}  G_loss: {:<15.8e} | D(x)->1: {:<10d} D(G(z))->0: {:<10d} | D_acc: {:<10f} | [ETA] {}'.format(
                     epoch, disc_loss, gen_loss, n_x, n_z, d_accuracy, time.time() - T_start))
 
             if FLAGS.Dp and d_accuracy < d_thresh:
@@ -295,7 +296,7 @@ def trainGAN(checkpoint=None, model_name=model_name):
                     epoch, disc_loss, gen_loss, n_x, n_z, d_accuracy))
 
             # output generated images
-            if epoch % 1000 == 0:
+            if epoch % 200 == 0:
                 g_train = sess.run(g_z,feed_dict={z_vector:z}) #type=np.ndarray
                 g_val   = sess.run(g_z,feed_dict={z_vector:z_val}) #type=np.ndarray
                 if not os.path.exists(train_sample_directory):
@@ -308,22 +309,22 @@ def trainGAN(checkpoint=None, model_name=model_name):
                 # ---------------------------------------------------------------------------------------------------------------------
 
             # save checkpoint
-            if epoch % 1000 == 0:
+            if epoch % 200 == 0:
                 if not os.path.exists(model_directory):
                     os.makedirs(model_directory)
                 saver.save(sess, save_path = os.path.join(model_directory, '{}.ckpt'.format(model_name)), global_step=global_step)
 
             # Calculate ``Inception Score`` (T. Salimans, et al., 2016)
-            if epoch % 10 == 0:
-                g_train = sess.run(g_z,feed_dict={z_vector:z}) #type=np.ndarray
-                g_train = (g_train + 1) * 127.5
-                score, std = get_inception_score(list(g_train), splits=1)
-                print ()
-                print ("[*] Inception score [exp(KL(p(y|x) || p(y))]: ", score)
-                # print ("[*] Difference in each split (standard deviation): ", std)
-                print ()
-                summary_inp = sess.run(summary_inp_score, feed_dict={inp_score: score})
-                writer.add_summary(summary_inp, epoch)
+            # if epoch % 10 == 0:
+            #     g_train = sess.run(g_z,feed_dict={z_vector:z}) #type=np.ndarray
+            #     g_train = (g_train + 1) * 127.5
+            #     score, std = get_inception_score(list(g_train), splits=1)
+            #     print ()
+            #     print ("[*] Inception score [exp(KL(p(y|x) || p(y))]: ", score)
+            #     # print ("[*] Difference in each split (standard deviation): ", std)
+            #     print ()
+            #     summary_inp = sess.run(summary_inp_score, feed_dict={inp_score: score})
+            #     writer.add_summary(summary_inp, epoch)
 
             writer.add_summary(summary_d, epoch)
             writer.add_summary(summary_g, epoch)

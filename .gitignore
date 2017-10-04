@@ -1,3 +1,7 @@
 *.pyc
 .*.swo
 .*.swp
+
+\[result\]*
+__models__/
+summary/
