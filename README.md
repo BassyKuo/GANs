@@ -32,3 +32,11 @@ Tensorboard 0.1.5 at http://ServerName:6006 (Press CTRL+C to quit)
 ```
 
 Then open your browser, go to `http://localhost:6006`. You can see the histogram of inception score progressing.
+
+## Examples of generated images
+* mnist
+![mnist] (./sample_data/01-mnist_DCGAN_slim-64bs-0.0002glr-0.0002dlr_9800.jpg "mnist_example")
+* cifar10
+![cifar10] (./sample_data/01-cifar10_DCGAN_slim-256bs-0.0002glr-0.0002dlr_31600.jpg "cifar10_example")
+* imagenet
+![imagenet] (./sample_data/01-imagenet-CENTRA_DCGAN_slim-conv2d_BN-normalnoise-256bs-0.0002glr-0.0002dlr_18000.jpg "imagenet_example")
